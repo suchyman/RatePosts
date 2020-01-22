@@ -122,3 +122,48 @@ function wpse30583_enqueue()
     );
     wp_localize_script( 'wpse30583_script', 'wpse3058_object', $data );
 }
+
+//add shortcode [RateList]
+function Rate_List_Posts() { 
+$wpb_all_query = new WP_Query(array(
+                'post_type'=>'post',
+                'post_status'=>'publish',
+                'posts_per_page'=>-1,
+                'meta_query' => array(
+                  array(
+                      'key'     => '_likes_count',
+                      'value'   => '0',
+                      'compare' => '>=',
+                  ),
+              ),
+              ));
+$i=0;
+echo '<table>';
+echo '<tr><td>LP</td><td>Tytuł</td><td>Likes</td><td>Unlikes</td></tr>';
+
+if ( $wpb_all_query->have_posts() ) : 
+ 
+while ( $wpb_all_query->have_posts() ) : $wpb_all_query->the_post(); 
+$i=$i+1;
+$meta_likes=get_post_meta(get_the_ID(),'_likes_count',true);
+if (empty($meta_likes)) { $meta_likes=0; }
+$meta_unlikes=get_post_meta(get_the_ID(),'un_likes_count',true);
+if (empty($meta_unlikes)) { $meta_unlikes=0; }
+?>
+
+<tr>
+<td><?php echo $i; ?></td>
+<td><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></td>
+<td><?php echo $meta_likes ?></td>
+<td><?php echo $meta_unlikes ?></td>
+</tr><?php ?>
+<?php endwhile; 
+echo '</table>';    
+wp_reset_postdata();
+
+else :
+    _e( 'Sorry, no posts matched your criteria.' ); 
+endif;
+
+}
+add_shortcode('RateList', 'Rate_List_Posts');
